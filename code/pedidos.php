@@ -1,97 +1,47 @@
 <?php
 require 'includes/conexao.php';
-require 'includes/funcoes.php';
+require 'includes/exibicao.php';
+require 'includes/funcionario.php';
+require 'includes/pedido.php';
 
 $erros = [];
 $sucesso = false;
 
-$idPedido = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: null;
-$editando = $idPedido !== null;
+$idPedidoEmEdicao = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: null;
+$editando = $idPedidoEmEdicao !== null;
 $titulo = $editando ? 'Editar pedido' : 'Cadastro de pedidos';
-
-$pedido = [
-    'medicamento' => '',
-    'quantidade' => '',
-    'categoria' => '',
-    'id_funcionario' => '',
-    'urgencia' => '',
-    'status' => 'solicitado',
-];
+$pedido = pedidoVazio();
 
 if ($editando) {
-    $consulta = $pdo->prepare('SELECT * FROM pedido_reposicao WHERE id_pedido = ?');
-    $consulta->execute([$idPedido]);
-    $existente = $consulta->fetch();
-    if (!$existente) {
+    $pedidoSalvo = buscarPedidoPorId($pdo, $idPedidoEmEdicao);
+    if (!$pedidoSalvo) {
         header('Location: index.php');
         exit;
     }
-    $pedido = array_merge($pedido, $existente);
+    $pedido = array_merge($pedido, $pedidoSalvo);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $pedido['medicamento'] = trim($_POST['medicamento'] ?? '');
-    $pedido['quantidade'] = trim($_POST['quantidade'] ?? '');
-    $pedido['categoria'] = $_POST['categoria'] ?? '';
-    $pedido['id_funcionario'] = $_POST['id_funcionario'] ?? '';
-    $pedido['urgencia'] = $_POST['urgencia'] ?? '';
-    if ($editando) {
-        $pedido['status'] = $_POST['status'] ?? '';
+    $pedido = lerPedidoDoFormulario($_POST, $pedido, $editando);
+    $erros = validarPedido($pdo, $pedido, $editando);
+
+    if (!$erros && $editando) {
+        atualizarPedido($pdo, $idPedidoEmEdicao, $pedido);
     }
 
-    if ($pedido['medicamento'] === '') {
-        $erros[] = 'Informe o medicamento.';
-    }
-    if (!ctype_digit($pedido['quantidade']) || (int) $pedido['quantidade'] <= 0) {
-        $erros[] = 'A quantidade deve ser um número inteiro maior que zero.';
-    }
-    if (!array_key_exists($pedido['categoria'], CATEGORIAS)) {
-        $erros[] = 'Selecione a categoria.';
-    }
-    if (!array_key_exists($pedido['urgencia'], URGENCIAS)) {
-        $erros[] = 'Selecione a urgência.';
-    }
-    if ($editando && !array_key_exists($pedido['status'], STATUS)) {
-        $erros[] = 'Selecione o status.';
+    if (!$erros && !$editando) {
+        inserirPedidoComoSolicitadoNaDataAtual($pdo, $pedido);
+        $pedido = pedidoVazio();
     }
 
-    $consulta = $pdo->prepare('SELECT COUNT(*) FROM funcionario WHERE id_funcionario = ?');
-    $consulta->execute([$pedido['id_funcionario']]);
-    if ($consulta->fetchColumn() == 0) {
-        $erros[] = 'Selecione o funcionário.';
-    }
-
-    if (!$erros) {
-        if ($editando) {
-            $salvar = $pdo->prepare(
-                'UPDATE pedido_reposicao
-                    SET medicamento = ?, quantidade = ?, categoria = ?, id_funcionario = ?, urgencia = ?, status = ?
-                  WHERE id_pedido = ?'
-            );
-            $salvar->execute([
-                $pedido['medicamento'], (int) $pedido['quantidade'], $pedido['categoria'],
-                $pedido['id_funcionario'], $pedido['urgencia'], $pedido['status'], $idPedido,
-            ]);
-        } else {
-            $salvar = $pdo->prepare(
-                'INSERT INTO pedido_reposicao (medicamento, quantidade, categoria, id_funcionario, urgencia)
-                 VALUES (?, ?, ?, ?, ?)'
-            );
-            $salvar->execute([
-                $pedido['medicamento'], (int) $pedido['quantidade'], $pedido['categoria'],
-                $pedido['id_funcionario'], $pedido['urgencia'],
-            ]);
-            $pedido = array_fill_keys(array_keys($pedido), '');
-        }
-        $sucesso = true;
-    }
+    $sucesso = !$erros;
 }
 
-$funcionarios = $pdo->query('SELECT id_funcionario, nome FROM funcionario ORDER BY nome')->fetchAll();
+$funcionarios = listarFuncionariosPorNome($pdo);
 
 require 'includes/cabecalho.php';
 ?>
-<h2><?= e($titulo) ?></h2>
+<h2><?= escaparHtml($titulo) ?></h2>
 
 <?php if ($sucesso): ?>
     <div class="mensagem sucesso">
@@ -103,7 +53,7 @@ require 'includes/cabecalho.php';
     <div class="mensagem erro">
         <ul>
             <?php foreach ($erros as $erro): ?>
-                <li><?= e($erro) ?></li>
+                <li><?= escaparHtml($erro) ?></li>
             <?php endforeach; ?>
         </ul>
     </div>
@@ -118,18 +68,18 @@ require 'includes/cabecalho.php';
 <form method="post" class="formulario">
     <label>
         Medicamento
-        <input type="text" name="medicamento" maxlength="100" required value="<?= e($pedido['medicamento']) ?>">
+        <input type="text" name="medicamento" maxlength="100" required value="<?= escaparHtml($pedido['medicamento']) ?>">
     </label>
     <label>
         Quantidade
-        <input type="number" name="quantidade" min="1" step="1" required value="<?= e($pedido['quantidade']) ?>">
+        <input type="number" name="quantidade" min="1" step="1" required value="<?= escaparHtml($pedido['quantidade']) ?>">
     </label>
     <label>
         Categoria
         <select name="categoria" required>
             <option value="">Selecione...</option>
             <?php foreach (CATEGORIAS as $valor => $rotulo): ?>
-                <option value="<?= e($valor) ?>" <?= $pedido['categoria'] === $valor ? 'selected' : '' ?>><?= e($rotulo) ?></option>
+                <option value="<?= escaparHtml($valor) ?>" <?= $pedido['categoria'] === $valor ? 'selected' : '' ?>><?= escaparHtml($rotulo) ?></option>
             <?php endforeach; ?>
         </select>
     </label>
@@ -138,8 +88,8 @@ require 'includes/cabecalho.php';
         <select name="id_funcionario" required>
             <option value="">Selecione...</option>
             <?php foreach ($funcionarios as $funcionario): ?>
-                <option value="<?= e($funcionario['id_funcionario']) ?>" <?= (string) $pedido['id_funcionario'] === (string) $funcionario['id_funcionario'] ? 'selected' : '' ?>>
-                    <?= e($funcionario['nome']) ?>
+                <option value="<?= escaparHtml($funcionario['id_funcionario']) ?>" <?= (string) $pedido['id_funcionario'] === (string) $funcionario['id_funcionario'] ? 'selected' : '' ?>>
+                    <?= escaparHtml($funcionario['nome']) ?>
                 </option>
             <?php endforeach; ?>
         </select>
@@ -149,7 +99,7 @@ require 'includes/cabecalho.php';
         <select name="urgencia" required>
             <option value="">Selecione...</option>
             <?php foreach (URGENCIAS as $valor => $rotulo): ?>
-                <option value="<?= e($valor) ?>" <?= $pedido['urgencia'] === $valor ? 'selected' : '' ?>><?= e($rotulo) ?></option>
+                <option value="<?= escaparHtml($valor) ?>" <?= $pedido['urgencia'] === $valor ? 'selected' : '' ?>><?= escaparHtml($rotulo) ?></option>
             <?php endforeach; ?>
         </select>
     </label>
@@ -158,7 +108,7 @@ require 'includes/cabecalho.php';
             Status
             <select name="status" required>
                 <?php foreach (STATUS as $valor => $rotulo): ?>
-                    <option value="<?= e($valor) ?>" <?= $pedido['status'] === $valor ? 'selected' : '' ?>><?= e($rotulo) ?></option>
+                    <option value="<?= escaparHtml($valor) ?>" <?= $pedido['status'] === $valor ? 'selected' : '' ?>><?= escaparHtml($rotulo) ?></option>
                 <?php endforeach; ?>
             </select>
         </label>

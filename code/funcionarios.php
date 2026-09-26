@@ -1,6 +1,7 @@
 <?php
 require 'includes/conexao.php';
-require 'includes/funcoes.php';
+require 'includes/exibicao.php';
+require 'includes/funcionario.php';
 
 $titulo = 'Cadastro de funcionários';
 $erros = [];
@@ -11,32 +12,17 @@ $email = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nome = trim($_POST['nome'] ?? '');
     $email = trim($_POST['email'] ?? '');
-
-    if ($nome === '') {
-        $erros[] = 'Informe o nome.';
-    }
-    if ($email === '') {
-        $erros[] = 'Informe o e-mail.';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $erros[] = 'Informe um e-mail em formato válido.';
-    } else {
-        $consulta = $pdo->prepare('SELECT COUNT(*) FROM funcionario WHERE email = ?');
-        $consulta->execute([$email]);
-        if ($consulta->fetchColumn() > 0) {
-            $erros[] = 'Este e-mail já está cadastrado.';
-        }
-    }
+    $erros = validarFuncionario($pdo, $nome, $email);
 
     if (!$erros) {
-        $inserir = $pdo->prepare('INSERT INTO funcionario (nome, email) VALUES (?, ?)');
-        $inserir->execute([$nome, $email]);
+        inserirFuncionario($pdo, $nome, $email);
         $sucesso = true;
         $nome = '';
         $email = '';
     }
 }
 
-$funcionarios = $pdo->query('SELECT nome, email FROM funcionario ORDER BY nome')->fetchAll();
+$funcionarios = listarFuncionariosPorNome($pdo);
 
 require 'includes/cabecalho.php';
 ?>
@@ -50,7 +36,7 @@ require 'includes/cabecalho.php';
     <div class="mensagem erro">
         <ul>
             <?php foreach ($erros as $erro): ?>
-                <li><?= e($erro) ?></li>
+                <li><?= escaparHtml($erro) ?></li>
             <?php endforeach; ?>
         </ul>
     </div>
@@ -59,11 +45,11 @@ require 'includes/cabecalho.php';
 <form method="post" class="formulario">
     <label>
         Nome
-        <input type="text" name="nome" maxlength="100" required value="<?= e($nome) ?>">
+        <input type="text" name="nome" maxlength="100" required value="<?= escaparHtml($nome) ?>">
     </label>
     <label>
         E-mail
-        <input type="email" name="email" maxlength="150" required value="<?= e($email) ?>">
+        <input type="email" name="email" maxlength="150" required value="<?= escaparHtml($email) ?>">
     </label>
     <div>
         <button type="submit" class="botao">Salvar</button>
@@ -74,7 +60,7 @@ require 'includes/cabecalho.php';
 <?php if ($funcionarios): ?>
     <ul>
         <?php foreach ($funcionarios as $funcionario): ?>
-            <li><?= e($funcionario['nome']) ?> (<?= e($funcionario['email']) ?>)</li>
+            <li><?= escaparHtml($funcionario['nome']) ?> (<?= escaparHtml($funcionario['email']) ?>)</li>
         <?php endforeach; ?>
     </ul>
 <?php else: ?>

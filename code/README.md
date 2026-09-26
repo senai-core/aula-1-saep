@@ -32,11 +32,13 @@ code/
 ├── index.php            # Painel de reposição (tela inicial)
 ├── funcionarios.php     # Cadastro de funcionários
 ├── pedidos.php          # Cadastro de pedidos; com ?id=N vira a tela de edição
-├── acoes.php            # Ações dos cards: excluir e alterar status
+├── acoes_pedido.php     # Ações dos cards: excluir e alterar status
 ├── css/estilo.css       # Cores obrigatórias e fonte Segoe UI
 └── includes/
     ├── conexao.php      # Conexão PDO com o banco
-    ├── funcoes.php      # Rótulos (categoria, urgência, status) e escape de HTML
+    ├── exibicao.php     # Rótulos (categoria, urgência, status) e escaparHtml()
+    ├── funcionario.php  # Consultas e validação de funcionário
+    ├── pedido.php       # Consultas e validação de pedido
     ├── cabecalho.php    # Topo e menu principal
     └── rodape.php
 ```

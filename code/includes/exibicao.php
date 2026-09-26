@@ -18,7 +18,7 @@ const STATUS = [
     'recebido' => 'Recebido',
 ];
 
-function e($texto)
+function escaparHtml($texto)
 {
     return htmlspecialchars((string) $texto, ENT_QUOTES, 'UTF-8');
 }
