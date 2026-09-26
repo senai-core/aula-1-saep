@@ -1,8 +1,3 @@
--- =============================================================
--- SAEP - Controle de reposição de medicamentos
--- Script de criação do banco de dados (MySQL / MariaDB)
--- =============================================================
-
 SET NAMES utf8mb4;
 
 DROP DATABASE IF EXISTS saep_farmacia;
@@ -12,9 +7,6 @@ CREATE DATABASE saep_farmacia
 
 USE saep_farmacia;
 
--- -------------------------------------------------------------
--- Tabela: funcionario
--- -------------------------------------------------------------
 CREATE TABLE funcionario (
     id_funcionario INT          NOT NULL AUTO_INCREMENT,
     nome           VARCHAR(100) NOT NULL,
@@ -23,10 +15,6 @@ CREATE TABLE funcionario (
     CONSTRAINT uk_funcionario_email UNIQUE (email)
 ) ENGINE = InnoDB;
 
--- -------------------------------------------------------------
--- Tabela: pedido_reposicao
--- 1 funcionário : N pedidos
--- -------------------------------------------------------------
 CREATE TABLE pedido_reposicao (
     id_pedido        INT          NOT NULL AUTO_INCREMENT,
     id_funcionario   INT          NOT NULL,
@@ -44,9 +32,6 @@ CREATE TABLE pedido_reposicao (
     CONSTRAINT ck_pedido_quantidade CHECK (quantidade > 0)
 ) ENGINE = InnoDB;
 
--- -------------------------------------------------------------
--- Dados de teste
--- -------------------------------------------------------------
 INSERT INTO funcionario (nome, email) VALUES
     ('Ana Souza',      'ana.souza@farmacia.com'),
     ('Bruno Oliveira', 'bruno.oliveira@farmacia.com'),

@@ -1,5 +1,4 @@
 <?php
-// Handles the board card actions: delete and status change
 require 'includes/conexao.php';
 require 'includes/funcoes.php';
 

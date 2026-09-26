@@ -5,7 +5,6 @@ require 'includes/funcoes.php';
 $erros = [];
 $sucesso = false;
 
-// Edit mode: ?id=N loads an existing order
 $idPedido = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: null;
 $editando = $idPedido !== null;
 $titulo = $editando ? 'Editar pedido' : 'Cadastro de pedidos';
@@ -74,7 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pedido['id_funcionario'], $pedido['urgencia'], $pedido['status'], $idPedido,
             ]);
         } else {
-            // data_solicitacao and status use the database defaults (now / 'solicitado')
             $salvar = $pdo->prepare(
                 'INSERT INTO pedido_reposicao (medicamento, quantidade, categoria, id_funcionario, urgencia)
                  VALUES (?, ?, ?, ?, ?)'

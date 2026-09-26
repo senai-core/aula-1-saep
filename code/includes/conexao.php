@@ -1,5 +1,4 @@
 <?php
-// Database connection settings (XAMPP defaults)
 $host = 'localhost';
 $banco = 'saep_farmacia';
 $usuario = 'root';

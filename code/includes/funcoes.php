@@ -1,5 +1,4 @@
 <?php
-// Display labels for values stored in the database
 const CATEGORIAS = [
     'generico' => 'Genérico',
     'referencia' => 'Referência',

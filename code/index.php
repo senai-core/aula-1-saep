@@ -4,7 +4,6 @@ require 'includes/funcoes.php';
 
 $titulo = 'Painel de reposição';
 
-// High urgency first inside each column, then oldest request first
 $pedidos = $pdo->query(
     "SELECT p.*, f.nome AS funcionario
        FROM pedido_reposicao p
