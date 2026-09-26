@@ -13,31 +13,6 @@ Resolução do teste prático SAEP (Aula 1). Uma rede de farmácias precisa de u
 | 5 | Tela de cadastro de pedidos | [`code/pedidos.php`](code/pedidos.php) |
 | 6 | Painel de reposição | [`code/index.php`](code/index.php) |
 
-Como rodar o sistema: [`code/README.md`](code/README.md).
-
-## Estrutura do repositório
-
-```
-.
-├── code/                               # Código-fonte (PHP + MySQL)
-└── docs/
-    ├── der.jpg                         # Entrega 1
-    ├── criacao_do_banco_de_dados.sql   # Entrega 2 (estrutura + dados de teste)
-    ├── caso_de_uso.jpg                 # Entrega 3
-    ├── fontes/                         # Fontes Mermaid dos diagramas
-    └── telas/                          # Capturas das telas do sistema
-```
-
-## Diagramas
-
-Os diagramas foram escritos em [Mermaid](https://mermaid.js.org/) (`docs/fontes/*.mmd`) e exportados para JPG. Para gerar de novo:
-
-```bash
-npx -p @mermaid-js/mermaid-cli mmdc -i docs/fontes/der.mmd -o der.png -b white -s 3
-```
-
-O `mmdc` exporta PNG. Depois é só converter para JPG.
-
 ## Decisões tomadas
 
 - **Categorias** fixas numa lista: genérico, referência, controlado e higiene (os exemplos da prova).
