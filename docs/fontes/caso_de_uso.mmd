@@ -1,0 +1,32 @@
+---
+title: Caso de uso - Controle de reposição de medicamentos
+---
+flowchart LR
+    F(["Ator: Funcionário<br/>(balconista / farmacêutico)"])
+    E(["Ator: Estoque"])
+
+    subgraph S["Sistema de reposição de medicamentos"]
+        direction LR
+        UC1(["Cadastrar funcionário"])
+        UC2(["Cadastrar pedido de reposição"])
+        UC4(["Editar pedido<br/>(dados, urgência e status)"])
+        UC5(["Excluir pedido"])
+        UC3(["Visualizar painel de reposição"])
+        UC6(["Alterar status do pedido"])
+        UC8(["Validar campos obrigatórios"])
+        UC9(["Confirmar exclusão"])
+    end
+
+    F --- UC1
+    F --- UC2
+    F --- UC4
+    F --- UC5
+    F --- UC3
+    F --- UC6
+    E --- UC3
+    E --- UC6
+
+    UC1 -. "&lt;&lt;include&gt;&gt;" .-> UC8
+    UC2 -. "&lt;&lt;include&gt;&gt;" .-> UC8
+    UC4 -. "&lt;&lt;include&gt;&gt;" .-> UC8
+    UC5 -. "&lt;&lt;include&gt;&gt;" .-> UC9

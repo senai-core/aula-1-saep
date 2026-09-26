@@ -1,0 +1,22 @@
+---
+title: DER - Controle de reposição de medicamentos
+---
+erDiagram
+    FUNCIONARIO ||--|{ PEDIDO_REPOSICAO : "registra (1:N)"
+
+    FUNCIONARIO {
+        INT id_funcionario PK "AUTO_INCREMENT"
+        VARCHAR(100) nome "NOT NULL"
+        VARCHAR(150) email UK "NOT NULL"
+    }
+
+    PEDIDO_REPOSICAO {
+        INT id_pedido PK "AUTO_INCREMENT"
+        INT id_funcionario FK "NOT NULL"
+        VARCHAR(100) medicamento "NOT NULL"
+        INT quantidade "NOT NULL, > 0"
+        VARCHAR(20) categoria "NOT NULL"
+        ENUM urgencia "baixa | media | alta"
+        DATETIME data_solicitacao "DEFAULT agora"
+        ENUM status "DEFAULT solicitado"
+    }
